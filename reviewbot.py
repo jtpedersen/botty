@@ -2,6 +2,7 @@ import os
 import time
 import re
 from slackclient import SlackClient
+from session import Session
 
 slack_client = SlackClient(os.environ.get('SLACK_BOT_TOKEN'))
 
@@ -11,35 +12,6 @@ reviewbot_id = None
 RTM_READ_DELAY = 1 # 1 second delay between reading from RTM
 EXAMPLE_COMMAND = "do"
 MENTION_REGEX = "^<@(|[WU].+?)>(.*)"
-
-
-class Session(object):
-
-    def __init__(self, name):
-        self.q = 0;
-        self.name = name;
-        self.answers = []
-        self.qs = ["rating", "weight", "sight"]
-
-    def handleAnswer(self, a):
-        print("{} --- {}".format(self.name, a))
-        self.answers.append(a)
-
-    def nextQuestion(self):
-        if len(self.qs) == self.q:
-            return None
-
-        resp = self.qs[self.q]
-        print("{} --- {}".format(self.name, resp))
-        self.q += 1
-        return resp
-
-    def finalize(self):
-        lines = []
-        lines.append("You have answered:");
-        for i in range(len(self.qs)):
-            lines.append("{} --> {}".format(self.qs[i], self.answers[i]))
-        return "\n".join(lines)
 
 session = None
 
@@ -98,7 +70,7 @@ def handle_command(command, channel):
     else:
         # This is where you start to implement more commands!
         if command.startswith(EXAMPLE_COMMAND):
-            session = Session(command.replace(EXAMPLE_COMMAND, ""))
+            session = Session(command.replace(EXAMPLE_COMMAND, ""), ["what", "when", "how"])
             response = session.nextQuestion()
 
     # Sends the response back to the channel
