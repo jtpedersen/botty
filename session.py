@@ -6,9 +6,12 @@ class Session(object):
         self.answers = []
         self.qs = questions if questions else ["QA", "QB", "QC"]
 
-    def handleAnswer(self, a):
+    def handleInput(self, a):
         print("{} --- {}".format(self.name, a))
         self.answers.append(a)
+
+    def velcome(self):
+        return "Welcome to the a question session with {} questions".format(len(self.qs))
 
     def nextQuestion(self):
         if len(self.qs) == self.q:

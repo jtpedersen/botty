@@ -3,6 +3,7 @@ import time
 import re
 from slackclient import SlackClient
 from session import Session
+from weightbot import WeightBot
 
 slack_client = SlackClient(os.environ.get('SLACK_BOT_TOKEN'))
 
@@ -11,6 +12,7 @@ reviewbot_id = None
 #constants
 RTM_READ_DELAY = 1 # 1 second delay between reading from RTM
 EXAMPLE_COMMAND = "do"
+VOTE_COMMAND = "vote"
 MENTION_REGEX = "^<@(|[WU].+?)>(.*)"
 
 session = None
@@ -62,8 +64,7 @@ def handle_command(command, channel):
     # Finds and executes the given command, filling in response
     response = None
     if session:
-        session.handleAnswer(command)
-        response = session.nextQuestion()
+        response = session.handleInput(command)
         if not response:
             response = session.finalize()
             session = None
@@ -72,6 +73,9 @@ def handle_command(command, channel):
         if command.startswith(EXAMPLE_COMMAND):
             session = Session(command.replace(EXAMPLE_COMMAND, ""), ["what", "when", "how"])
             response = session.nextQuestion()
+        elif command.startswith(VOTE_COMMAND):
+            session = WeightBot(command.replace(VOTE_COMMAND, ""))
+            response = session.welcome()
 
     # Sends the response back to the channel
     slack_client.api_call(
